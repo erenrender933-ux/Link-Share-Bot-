@@ -5,7 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import ADMINS, INDEX_LINK_EXPIRE
 from database import db
 from helpers import (
-    get_missing, join_markup, delete_later,
+    get_missing, join_markup, link_expired,
     INDEX_TEXT, JOIN_TEXT, letters_markup,
 )
 
