@@ -66,3 +66,23 @@ async def delete_later(client, chat_id, msg_id, delay):
         await client.delete_messages(chat_id, msg_id)
     except Exception:
         pass
+
+
+async def link_expired(client, chat_id, msg_id, seconds):
+    """Delete the link message after expiry and send an expired notice"""
+    await asyncio.sleep(seconds)
+    try:
+        await client.delete_messages(chat_id, msg_id)
+    except Exception:
+        pass
+    await client.send_message(
+        chat_id,
+        f"<b>⏰ This link expired in {seconds // 60} min.</b>\n\n"
+        "If the link is expired, click the post again to create a new link for you.",
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("📚 Open Index", callback_data="idx_home")],
+                [InlineKeyboardButton("• Close •", callback_data="close")],
+            ]
+        ),
+    )
