@@ -20,6 +20,7 @@ class Database:
         self.reqs = self.db.requests
         self.goal_users = self.db.goal_users
         self.index = self.db.index
+        self.channels = self.db.channels
 
     # ---------- users ----------
     async def add_user(self, uid):
