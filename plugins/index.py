@@ -78,7 +78,7 @@ async def go_channel(client, q):
     except Exception:
         return await q.answer("Could not create the link. Please tell the admin.", show_alert=True)
     await q.answer()
-    text = "<b>Here is your link! Click below to proceed.</b>"
+    text = "<b><blockquote>⚡ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ!.</blockquite>/n/n<blockquote>⏳ ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ.</blockquote></b>"
     if temp:
         text += "\n\n" + expiry_text()
     m = await q.message.reply(
