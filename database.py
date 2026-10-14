@@ -91,7 +91,17 @@ class Database:
             {"_id": cid, "notified": False}, {"$set": {"notified": True}}
         )
         return r.modified_count == 1
+        
+# ---------- share channels ----------
+    async def add_channel(self, cid, title):
+        await self.channels.update_one({"_id": cid}, {"$set": {"title": title}}, upsert=True)
 
+    async def get_channel(self, cid):
+        return await self.channels.find_one({"_id": cid})
+
+    async def del_channel(self, cid):
+        await self.channels.delete_one({"_id": cid})
+        
     # ---------- index ----------
     async def add_index(self, cid, name):
         await self.index.update_one(
