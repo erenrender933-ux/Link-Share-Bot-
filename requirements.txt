@@ -1,0 +1,4 @@
+pyrofork==2.3.45
+tgcrypto
+motor==3.5.1
+python-dotenv
