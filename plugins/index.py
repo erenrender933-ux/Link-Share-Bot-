@@ -1,11 +1,10 @@
 import asyncio
-from datetime import datetime, timedelta
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import ADMINS, INDEX_LINK_EXPIRE
 from database import db
 from helpers import (
-    get_missing, join_markup, link_expired,
+    get_missing, join_markup, get_channel_link, link_expired, expiry_text,
     INDEX_TEXT, JOIN_TEXT, letters_markup,
 )
 
@@ -75,24 +74,20 @@ async def go_channel(client, q):
         return
     cid = int(q.data.split("|")[1])
     try:
-        link = await client.create_chat_invite_link(
-            cid,
-            expire_date=datetime.now() + timedelta(seconds=INDEX_LINK_EXPIRE),
-            member_limit=1,
-        )
+        url, temp = await get_channel_link(client, cid, True)
     except Exception:
         return await q.answer("Could not create the link. Please tell the admin.", show_alert=True)
     await q.answer()
-    minutes = INDEX_LINK_EXPIRE // 60
+    text = "<b>Here is your link! Click below to proceed.</b>"
+    if temp:
+        text += "\n\n" + expiry_text()
     m = await q.message.reply(
-        f"<b>Your link is ready!</b>\n\n"
-        f"⏳ This link will expire in {minutes} minutes, so join fast!\n"
-        "If the link is expired, click the post again to create a new link for you.",
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Join Channel ⚡", url=link.invite_link)]]
-        ),
+        text,
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("• Request to Join •", url=url)]]),
     )
-    asyncio.create_task(link_expired(client, m.chat.id, m.id, INDEX_LINK_EXPIRE))
+    if temp:
+        asyncio.create_task(link_expired(client, m.chat.id, m.id, INDEX_LINK_EXPIRE))
+
 
 # ---------------- Admin: manage index ----------------
 @Client.on_message(filters.command("addindex") & admin)
