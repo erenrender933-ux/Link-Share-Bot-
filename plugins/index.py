@@ -83,14 +83,16 @@ async def go_channel(client, q):
     except Exception:
         return await q.answer("Could not create the link. Please tell the admin.", show_alert=True)
     await q.answer()
+    minutes = INDEX_LINK_EXPIRE // 60
     m = await q.message.reply(
-        f"<b>Your link is ready!</b>\nValid for {INDEX_LINK_EXPIRE // 60} minutes, 1 use only.",
+        f"<b>Your link is ready!</b>\n\n"
+        f"⏳ This link will expire in {minutes} minutes, so join fast!\n"
+        "If the link is expired, click the post again to create a new link for you.",
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Join Channel", url=link.invite_link)]]
+            [[InlineKeyboardButton("Join Channel ⚡", url=link.invite_link)]]
         ),
     )
-    asyncio.create_task(delete_later(client, m.chat.id, m.id, INDEX_LINK_EXPIRE))
-
+    asyncio.create_task(link_expired(client, m.chat.id, m.id, INDEX_LINK_EXPIRE))
 
 # ---------------- Admin: manage index ----------------
 @Client.on_message(filters.command("addindex") & admin)
