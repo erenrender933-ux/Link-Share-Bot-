@@ -35,8 +35,7 @@ async def link_cmd(client, message):
 async def delch(client, message):
     if len(message.command) < 2:
         return await message.reply("Usage: <code>/delch -100xxxxxxxxxx</code>")
-    await db.del_channel(i
-                         nt(message.command[1]))
+    await db.del_channel(int(message.command[1]))
     await message.reply("✅ Removed. Its shared links will stop working.")
 
 
