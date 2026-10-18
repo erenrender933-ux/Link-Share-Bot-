@@ -1,12 +1,10 @@
-import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from database import db
 from helpers import (
-    get_missing, join_markup, get_channel_link, link_expired, decode_id, expiry_text,
+    get_missing, join_markup, get_channel_link, send_link_messages, decode_id,
     INDEX_TEXT, JOIN_TEXT, letters_markup,
 )
-from config import INDEX_LINK_EXPIRE
 
 
 @Client.on_message(filters.command("start") & filters.private)
@@ -44,20 +42,13 @@ async def start(client, message):
     if not await db.get_channel(cid):
         return await message.reply("❌ Invalid or removed link.")
     try:
-        url, temp = await get_channel_link(client, cid, request)
-    except Exception:
+        url, _ = await get_channel_link(client, cid, request)
+    except Exception as e:
+        print(f"[LINK] cannot create link for {cid}: {e}")
         return await message.reply("❌ Could not create the link. Please tell the admin.")
 
-    text = "<b><blockquote>⚡ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ!.</blockquite>/n/n<blockquote>⏳ ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ.</blockquote></b>"
-    if temp:
-        text += "\n\n" + expiry_text()
-    label = "• ɢɪᴠᴇ ʀᴇǫ 🔗 •" if request else "• ᴊᴏɪɴ 🔗 •"
-    m = await message.reply(
-        text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(label, url=url)]])
-    )
-    if temp:
-        retry_url = f"https://t.me/{client.me.username}?start={payload}"
-        asyncio.create_task(link_expired(client, m.chat.id, m.id, INDEX_LINK_EXPIRE, retry_url))
+    label = "• Request to Join •" if request else "• Join Channel •"
+    await send_link_messages(client, message.chat.id, url, label)
 
 
 @Client.on_callback_query(filters.regex("^recheck$"))
