@@ -7,6 +7,7 @@ API_ID = int(os.environ.get("API_ID", "0"))
 API_HASH = os.environ.get("API_HASH", "")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMINS = [int(x) for x in os.environ.get("ADMINS", "").split()]
+ADMIN_BYPASS = os.environ.get("ADMIN_BYPASS", "False").lower() == "true"
 MONGO_URL = os.environ.get("MONGO_URL", "")
 DB_NAME = os.environ.get("DB_NAME", "linkbot")
 
