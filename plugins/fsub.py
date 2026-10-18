@@ -5,10 +5,6 @@ from database import db
 admin = filters.user(ADMINS) & filters.private
 
 
-def link_id(link: str) -> str:
-    return (link or "").rstrip("/").split("/")[-1]
-
-
 @Client.on_message(filters.command("addfsub") & admin)
 async def addfsub(client, message):
     # /addfsub -100xxxxxxxxxx        -> normal join link
@@ -109,20 +105,21 @@ async def goals(client, message):
 @Client.on_chat_join_request()
 async def on_request(client, req):
     cid = req.chat.id
+    uid = req.from_user.id
+    print(f"[JOIN REQUEST] chat={cid} user={uid}")
+
     ch = await db.get_fsub_one(cid)
     if not ch:
         return
-    uid = req.from_user.id
     await db.add_request(uid, cid)  # lets the user pass force-sub
 
     if ch.get("goal", 0) <= 0:
         return
-    used = req.invite_link.invite_link if req.invite_link else ""
-    if link_id(used) != link_id(ch["link"]):
-        return  # request did not come from the goal link
     if not await db.add_goal_user(uid, cid):
-        return
+        return  # this user is already counted
     doc = await db.inc_goal(cid)
+    print(f"[GOAL] {doc['title']}: {doc['count']}/{doc['goal']}")
+
     if doc["count"] >= doc["goal"] and await db.mark_notified(cid):
         for admin_id in ADMINS:
             try:
