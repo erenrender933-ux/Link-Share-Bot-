@@ -34,6 +34,11 @@ class Database:
 
     # ---------- force sub ----------
     async def add_fsub(self, cid, title, link, request):
+        doc = await self.fsub.find_one({"_id": cid})
+        if doc and doc.get("goal", 0) > 0:
+            # keep the single goal link, only refresh the title
+            await self.fsub.update_one({"_id": cid}, {"$set": {"title": title}})
+            return
         await self.fsub.update_one(
             {"_id": cid},
             {
