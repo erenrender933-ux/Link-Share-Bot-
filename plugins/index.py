@@ -1,10 +1,9 @@
-import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from config import ADMINS, INDEX_LINK_EXPIRE
+from config import ADMINS
 from database import db
 from helpers import (
-    get_missing, join_markup, get_channel_link, link_expired, expiry_text,
+    get_missing, join_markup, get_channel_link, send_link_messages,
     INDEX_TEXT, JOIN_TEXT, letters_markup,
 )
 
@@ -74,19 +73,12 @@ async def go_channel(client, q):
         return
     cid = int(q.data.split("|")[1])
     try:
-        url, temp = await get_channel_link(client, cid, True)
-    except Exception:
+        url, _ = await get_channel_link(client, cid, True)
+    except Exception as e:
+        print(f"[LINK] cannot create link for {cid}: {e}")
         return await q.answer("Could not create the link. Please tell the admin.", show_alert=True)
     await q.answer()
-    text = "<b><blockquote>⚡ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ!.</blockquite>/n/n<blockquote>⏳ ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴄᴇᴇᴅ.</blockquote></b>"
-    if temp:
-        text += "\n\n" + expiry_text()
-    m = await q.message.reply(
-        text,
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("• Request to Join •", url=url)]]),
-    )
-    if temp:
-        asyncio.create_task(link_expired(client, m.chat.id, m.id, INDEX_LINK_EXPIRE))
+    await send_link_messages(client, q.message.chat.id, url, "• Request to Join •")
 
 
 # ---------------- Admin: manage index ----------------
